@@ -13,9 +13,25 @@
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "css": ["content-scripts/content-script.css"], 
-            "js": ["content-scripts/content-script.js"]
+            "js": ["inject.js"], 
+            "run_at": "document_idle", 
+            "all_frames": true
+
         }
     ], 
-    "devtools_page": "devtools/devtools.html"
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "js/firebase/firebase_config.js", 
+                "js/firebase/firebase-app.js", 
+                "js/firebase/firebase-firestore.js", 
+                "js/firebase/firebase-database.js"
+            ], 
+            "matches": ["<all_urls>"]
+        }
+    ], 
+    "externally_connectable": {
+        "matches": [ "<all_urls>" ]
+      }
 }
+
