@@ -4,19 +4,20 @@
     "description": "Crash Course for Creating Browser Extension",
     "version": "1.0", 
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "background.js", 
+        "type": "module"
     },
     "action": {
         "default_popup": "popup/popup.html"
     }, 
+    "devtools_page": "devtools.html",
     "options_page": "options/options.html", 
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["inject.js"], 
+            "js": ["background.js"], 
             "run_at": "document_idle", 
             "all_frames": true
-
         }
     ], 
     "web_accessible_resources": [
@@ -24,14 +25,14 @@
             "resources": [
                 "js/firebase/firebase_config.js", 
                 "js/firebase/firebase-app.js", 
-                "js/firebase/firebase-firestore.js", 
-                "js/firebase/firebase-database.js"
+                "js/firebase/firebase-firestore.js"
             ], 
             "matches": ["<all_urls>"]
         }
     ], 
     "externally_connectable": {
         "matches": [ "<all_urls>" ]
-      }
+      }, 
+    "permissions": ["tabs"]
 }
 
