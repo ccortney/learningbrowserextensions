@@ -5,13 +5,14 @@ chrome.runtime.onMessage.addListener( (msg) => {
     document.body.innerHTML = `
     <div>
         Alternative: ${msg.text.data.name}<br>
-        <img src=${msg.text.data.img}>
-        <a href=${msg.text.data.link}>Go to Product</a>
+        <img src="https:${msg.text.data.img}">
+        <button class="product-link">Open Product Page</button>
     </div>
     `
+    const link = document.querySelector('.product-link')
+    link.addEventListener('click', function (e) {
+        chrome.tabs.create({
+            url:`${msg.text.data.link}`
+          });
+    })
 })
-
-// I need to use browserAction somehow to get new tabs (links) to work
-// chrome.browserAction.onClicked.addListener(function(tab) {
-//     chrome.tabs.create({ url: "http://www.google.com" });
-// });

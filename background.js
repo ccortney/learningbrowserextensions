@@ -24,9 +24,9 @@ const firebaseConfig = {
 const firebase_app = initializeApp(firebaseConfig);
 const db = getFirestore(firebase_app)
 
-
 async function getTab(query) {
     let result = await chrome.tabs.query(query)
+    console.log(result[0])
     return result[0].title
 }
 
@@ -59,6 +59,7 @@ chrome.runtime.onMessage.addListener( async (msg) => {
         get_database_elements('products')
             .then((snapshot) => {
                 send_data(snapshot, webTitle)
+                // Do I need a .then, .catch?
                 snapshot.docs.forEach((doc) => {
                     products.push(doc.data())
                 })

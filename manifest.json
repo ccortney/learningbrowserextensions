@@ -23,16 +23,12 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "js/firebase/firebase_config.js", 
                 "js/firebase/firebase-app.js", 
                 "js/firebase/firebase-firestore.js"
             ], 
             "matches": ["<all_urls>"]
         }
     ], 
-    "externally_connectable": {
-        "matches": [ "<all_urls>" ]
-      }, 
-    "permissions": ["tabs"]
+    "permissions": ["tabs", "activeTab"]
 }
 
