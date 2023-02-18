@@ -10,6 +10,7 @@ chrome.runtime.onMessage.addListener( (msg) => {
     </div>
     `
     const link = document.querySelector('.product-link')
+    
     link.addEventListener('click', function (e) {
         chrome.tabs.create({
             url:`${msg.text.data.link}`
