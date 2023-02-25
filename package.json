@@ -1,19 +1,14 @@
 {
-  "name": "crash-course",
-  "version": "1.0.0",
-  "description": "",
-  "main": "background.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ohmilla/learningbrowserextensions.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ohmilla/learningbrowserextensions/issues"
-  },
-  "homepage": "https://github.com/ohmilla/learningbrowserextensions#readme"
+	"name": "greener-healthier-happier",
+	"version": "1.0.0",
+	"description": "A web browser extension that provides sustainable, environmentally-friendly alternatives.",
+	"main": "background.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "webpack"
+	},
+	"devDependencies": {
+		"webpack": "^5.75.0",
+		"webpack-cli": "^5.0.1"
+	}
 }

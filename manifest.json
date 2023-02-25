@@ -1,32 +1,31 @@
 {
     "manifest_version": 3, 
-    "name": "Browser Extension Crash Course", 
-    "description": "Crash Course for Creating Browser Extension",
+    "name": "Greener Healthier Happier", 
+    "description": "A web browser extension that provides sustainable, environmentally-friendly alternatives.",
     "version": "1.0", 
     "background": {
         "service_worker": "background.js", 
         "type": "module"
     },
+    "content_scripts": [
+        {
+            "matches": ["*://*.amazon.com/*"],
+            "js": ["background.js"], 
+            "run_at": "document_end"
+        }
+    ], 
     "action": {
         "default_popup": "popup/popup.html"
     }, 
     "devtools_page": "devtools.html",
     "options_page": "options/options.html", 
-    "content_scripts": [
-        {
-            "matches": ["<all_urls>"],
-            "js": ["background.js"], 
-            "run_at": "document_idle", 
-            "all_frames": true
-        }
-    ], 
     "web_accessible_resources": [
         {
             "resources": [
                 "js/firebase/firebase-app.js", 
                 "js/firebase/firebase-firestore.js"
             ], 
-            "matches": ["<all_urls>"]
+            "matches": ["*://*.amazon.com/*"]
         }
     ], 
     "permissions": ["tabs", "activeTab"]

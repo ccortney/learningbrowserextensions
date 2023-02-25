@@ -21,12 +21,25 @@ const firebaseConfig = {
     measurementId: 'G-QTMCMYZHKN',
   };
 
+// domain = domain.replace('http://', '').replace('https://', '').replace('www.','').split(/[/?#]/)[0];
+
 const firebase_app = initializeApp(firebaseConfig);
 const db = getFirestore(firebase_app)
 
+function getDomain(url) {
+    let domain = url;
+    domain = domain.replace('http://', '')
+        .replace('https://', '')
+        .replace('www.','')
+        .split(/[/?#]/)[0];
+    return domain
+}
+
 async function getTab(query) {
     let result = await chrome.tabs.query(query)
-    console.log(result[0])
+    // console.log(result[0])
+    let domain = getDomain(result[0].url)
+    // console.log(domain)
     return result[0].title
 }
 
