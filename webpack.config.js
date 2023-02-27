@@ -2,9 +2,8 @@ const webpack = require('webpack'),
   path = require('path'),
   CopyWebpackPlugin = require('copy-webpack-plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+// for now just production
 process.env.NODE_ENV =  'production'
 
 const options = {
