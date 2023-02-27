@@ -1,0 +1,28 @@
+{
+	"manifest_version": 3,
+	"name": "Greener Healthier Happier",
+	"description": "A web browser extension that provides sustainable, environmentally-friendly alternatives.",
+	"version": "1.0",
+	"background": {
+		"service_worker": "background.bundle.js",
+		"type": "module"
+	},
+	"content_scripts": [
+		{
+			"matches": [ "*://*.amazon.com/*" ],
+			"js": [ "background.bundle.js" ],
+			"run_at": "document_end"
+		}
+	],
+	"action": {
+		"default_popup": "popup.html"
+	},
+	// "options_page": "options/options.html",
+	"web_accessible_resources": [
+		{
+			"resources": [ "firebase-app.bundle.js", "firebase-firestore.bundle.js" ],
+			"matches": [ "*://*.amazon.com/*" ]
+		}
+	],
+	"permissions": [ "tabs", "activeTab" ]
+}

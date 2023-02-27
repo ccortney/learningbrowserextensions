@@ -1,5 +1,5 @@
 // I am still getting an import error, but everything is working. Look into this.
-import { initializeApp } from "./js/firebase/firebase-app.js"
+import { initializeApp } from "../firebase/firebase-app.js"
 import {    getFirestore, 
             collection, 
             query, 
@@ -7,7 +7,7 @@ import {    getFirestore,
             getDocs, 
             addDoc, 
             doc 
-        } from "./js/firebase/firebase-firestore.js"
+        } from "../firebase/firebase-firestore.js"
 
 const firebaseConfig = {
     apiKey: 'AIzaSyCUOWLQzjGuHfsd0Ih6MmEiOwcdoLYWyUM',
@@ -60,7 +60,7 @@ function send_data(snapshot, webTitle) {
 chrome.runtime.onMessage.addListener( async (msg) => {
     // this will return the title of the tab, which gives the current amazon product
     let webTitle = await getTab({active: true, lastFocusedWindow: true})
-    console.log(webTitle)
+    console.log(`WebTitle: ${webTitle}`)
 
     // I am not sure if we will be sending other commands other than GET from popup.js
     // If not, we can end up removing this if statement
