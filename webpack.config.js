@@ -1,7 +1,8 @@
 const webpack = require('webpack'),
   path = require('path'),
   CopyWebpackPlugin = require('copy-webpack-plugin'),
-  HtmlWebpackPlugin = require('html-webpack-plugin');
+  HtmlWebpackPlugin = require('html-webpack-plugin'),
+  MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 // for now just production
 process.env.NODE_ENV =  'production'
@@ -22,21 +23,8 @@ const options = {
   module: {
     rules: [
       {
-        test: /\.(css|scss)$/,
-        use: [
-          {
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
-        ],
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader"]
       },
       {
         test: /\.(js|jsx)$/,
@@ -62,16 +50,25 @@ const options = {
         },
       ],
     }),
+    // new CopyWebpackPlugin({
+    //   patterns: [
+    //     {
+    //       from: 'src/popup/popup.css',
+    //       to: path.join(__dirname, 'dist'),
+    //       force: true,
+    //     },
+    //   ],
+    // }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'Popup', 'popup.html'),
       filename: 'popup.html',
       chunks: ['popup'],
       cache: false,
     }),
-  ].filter(Boolean),
-  infrastructureLogging: {
-    level: 'info',
-  },
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
+  ]
 };
 
 module.exports = options;
