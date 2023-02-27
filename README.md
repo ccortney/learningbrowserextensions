@@ -4,7 +4,8 @@
 
 1. Clone the repository
 2. Run `npm install`
-3. Run `npm run build` 
+3. Run `npm run build` for production or `npm run watch` for auto rebuilds when changes are saved.
+
 <!-- 3. Run `npm run start` for development mode, `npm run build` for production build -->
 4. Add the extension to Chrome:
     1. Go to `chrome://extensions/`
