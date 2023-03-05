@@ -1,4 +1,3 @@
-// I am still getting an import error, but everything is working. Look into this.
 import {initializeApp} from "../firebase/firebase-app.js"
 import {
     getFirestore,
