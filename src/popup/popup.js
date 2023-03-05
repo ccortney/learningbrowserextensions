@@ -2,7 +2,7 @@
 chrome.runtime.sendMessage({command: 'GET'})
 
 chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.command === 'AMAZON - PRODUCT') {
+    if (msg.command === 'AMAZON - PRODUCT FOUND') {
         document.body.innerHTML = `
     <div>
         Alternative: ${
@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener((msg) => {
         }<br>
         <img src="https:${
             msg.data.img
-        }">
+        }"><br>
         <button class="product-link">Open Product Page</button>
     </div>
     `
@@ -23,7 +23,13 @@ chrome.runtime.onMessage.addListener((msg) => {
                 }`
             });
         })
-    } else if (msg.command === 'AMAZON - NOT PRODUCT') {
+    } else if (msg.command === 'AMAZON - PRODUCT NOT FOUND') {
+        document.body.innerHTML = `
+            <div>
+                No alternative found at this time.
+            </div>
+        `
+    } else if (msg.command === 'AMAZON - NOT PRODUCT PAGE') {
         document.body.innerHTML = `
             <div>
                 Click on a product to start finding alternatives!
@@ -42,6 +48,5 @@ chrome.runtime.onMessage.addListener((msg) => {
         link.addEventListener('click', function (e) {
             chrome.tabs.create({url: `https://www.amazon.com`});
         })
-
     }
 })

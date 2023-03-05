@@ -27,8 +27,13 @@ const db = getFirestore(firebase_app)
 async function getTab(query) {
     let result = await chrome.tabs.query(query)
     let domain = getDomain(result[0].url)
-    let productPage = checkUrl(result[0].url)
-    return {tabName: result[0].title, domain: domain, url: result[0].url, productPage: productPage}
+    let urlResults = checkUrl(result[0].url)
+    return {
+        tabName: result[0].title,
+        domain: domain,
+        url: result[0].url,
+        ... urlResults
+    }
 }
 
 function getDomain(url) {
@@ -38,41 +43,59 @@ function getDomain(url) {
 }
 
 function checkUrl(url) {
-    const substrings = ["/dp", "/gp/product", "s?k="]
-    const result = substrings.some(str => url.includes(str))
-    return result
+    const productStrs = ["/dp", "/gp/product"]
+    const searchStr = "s?k="
+    const productResult = productStrs.some(str => url.includes(str))
+    const searchResult = url.includes(searchStr)
+    return {productPage: productResult, searchPage: searchResult}
 }
 
-async function get_database_elements(db_name) {
+async function getDatabaseElements(db_name) {
     const q = query(collection(db, db_name));
     const querySnapshot = await getDocs(q);
     return querySnapshot
 }
 
-function send_data(snapshot, tabInfo) { // we are sending a message back to popup.js with data
-    chrome.runtime.sendMessage({data: snapshot.docs[0].data(), domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT'});
+async function searchData(snapshot, tabInfo) {
+    const tab = tabInfo.tabName.replace('Amazon.com : ', '').toLowerCase();
+    for (let doc of snapshot.docs) {
+        if (tabInfo.productPage) {
+            if (tab.includes(doc.data().name.toLowerCase())) {
+                return doc.data()
+            }
+        } else {
+            if (doc.data().name.toLowerCase().includes(tab)) {
+                return doc.data()
+            }
+        }
+    }
+}
+
+function sendData(doc, tabInfo) { // we are sending a message back to popup.js with data
+    if (! doc) {
+        chrome.runtime.sendMessage({domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT NOT FOUND'});
+    } else {
+        chrome.runtime.sendMessage({data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT FOUND'});
+    }
 }
 
 chrome.runtime.onMessage.addListener(async (msg) => {
     let tabInfo = await getTab({active: true, lastFocusedWindow: true})
-    if (tabInfo.domain === "amazon.com" && tabInfo.productPage) {
-        // This allows me to see in the service worker,
-        // what data I am retrieving from Firestore
-        // This won't stay long term
-        let products = [];
+    if (tabInfo.domain === "amazon.com" && (tabInfo.productPage || tabInfo.searchPage)) {
 
-        get_database_elements('products').then((snapshot) => {
-            send_data(snapshot, tabInfo)
-            snapshot.docs.forEach((doc) => {
-                products.push(doc.data())
-            })
-            console.log(products)
+        getDatabaseElements('products').then((snapshot) => {
+            return searchData(snapshot, tabInfo)
+
+        }).then((doc) => {
+            sendData(doc, tabInfo)
         }).catch(err => {
-            console.log(err.message)
+            console.log(`Error: ${
+                err.message
+            }`)
         })
     } else if (tabInfo.domain === 'amazon.com') {
-        chrome.runtime.sendMessage({command: 'AMAZON - NOT PRODUCT'})
+        chrome.runtime.sendMessage({command: 'AMAZON - NOT PRODUCT PAGE'})
     } else {
-        chrome.runtime.sendMessage({command: 'NOT AMAZON'})
+        chrome.runtime.sendMessage({command: 'NOT AMAZON SITE'})
     }
 })
