@@ -1,8 +1,7 @@
 const webpack = require('webpack'),
     path = require('path'),
     CopyWebpackPlugin = require('copy-webpack-plugin'),
-    HtmlWebpackPlugin = require('html-webpack-plugin'),
-    MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    HtmlWebpackPlugin = require('html-webpack-plugin');
 
 // for now just production
 process.env.NODE_ENV = 'production'
@@ -33,7 +32,11 @@ const options = {
                     },
                 ],
                 exclude: /node_modules/
-            },
+            }, {
+                test: /\.png$/,
+                type: 'asset/resource',
+                exclude: /node_modules/
+            }
         ]
     },
     resolve: {
@@ -46,6 +49,17 @@ const options = {
                     {
                         from: 'src/manifest.json',
                         to: path.join(__dirname, 'dist'),
+                        force: true
+                    },
+                ]
+            }
+        ),
+        new CopyWebpackPlugin(
+            {
+                patterns: [
+                    {
+                        from: 'src/assets',
+                        to: path.join(__dirname, 'dist/assets'),
                         force: true
                     },
                 ]
