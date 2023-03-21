@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "Greener Healthier Happier",
-	"description": "A web browser extension that provides sustainable, environmentally-friendly alternatives.",
+	"description": "A web browser extension that provides sustainable, environmentally-friendly alternatives when shopping on Amazon.",
 	"version": "1.0",
 	"background": {
 		"service_worker": "background.bundle.js",
@@ -9,20 +9,24 @@
 	},
 	"content_scripts": [
 		{
-			"matches": [ "*://*.amazon.com/*" ],
+			"matches": [ "<all_urls>" ],
 			"js": [ "background.bundle.js" ],
 			"run_at": "document_end"
 		}
 	],
 	"action": {
-		"default_popup": "popup.html"
+		"default_popup": "popup.html", 
+		"default_title": "Greener Healthier Happier",
+		"default_icon": {
+			"16": "assets/greyicon.png"
+		  }
 	},
 	// "options_page": "options/options.html",
 	"web_accessible_resources": [
 		{
 			"resources": [ "firebase-app.bundle.js", "firebase-firestore.bundle.js" ],
-			"matches": [ "*://*.amazon.com/*" ]
+			"matches": [ "<all_urls>" ]
 		}
 	],
-	"permissions": [ "tabs", "activeTab" ]
+	"permissions": [ "tabs", "activeTab", "storage", "webNavigation" ]
 }
