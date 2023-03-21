@@ -29,6 +29,7 @@ async function getTab(query) {
     let urlResults = checkUrl(result[0].url)
     return {
         tabName: result[0].title,
+        tabId: result[0].tabId,
         domain: domain,
         url: result[0].url,
         ... urlResults
@@ -70,7 +71,7 @@ async function searchData(snapshot, tabInfo) {
     }
 }
 
-function sendData(doc, tabInfo) { // we are sending a message back to popup.js with data
+function sendData(doc, tabInfo) {
     if (! doc) {
         chrome.runtime.sendMessage({domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT NOT FOUND'});
     } else {
@@ -81,13 +82,13 @@ function sendData(doc, tabInfo) { // we are sending a message back to popup.js w
 chrome.runtime.onMessage.addListener(async (msg) => {
     let tabInfo = await getTab({active: true, lastFocusedWindow: true})
     if (tabInfo.domain === "amazon.com" && (tabInfo.productPage || tabInfo.searchPage)) {
-
         getDatabaseElements('products').then((snapshot) => {
             return searchData(snapshot, tabInfo)
 
         }).then((doc) => {
             sendData(doc, tabInfo)
         }).catch(err => {
+            chrome.runtime.sendMessage({command: 'ERROR'})
             console.log(`Error: ${
                 err.message
             }`)
@@ -96,5 +97,22 @@ chrome.runtime.onMessage.addListener(async (msg) => {
         chrome.runtime.sendMessage({command: 'AMAZON - NOT PRODUCT PAGE'})
     } else {
         chrome.runtime.sendMessage({command: 'NOT AMAZON SITE'})
+    }
+})
+
+chrome.tabs.onUpdated.addListener(async () => {
+    let tabInfo = await getTab({active: true, lastFocusedWindow: true})
+    if (tabInfo.domain === "amazon.com" && (tabInfo.productPage || tabInfo.searchPage)) {
+        getDatabaseElements('products').then((snapshot) => {
+            return searchData(snapshot, tabInfo)
+        }).then((doc) => {
+            if (doc) {
+                chrome.action.setIcon({path: 'assets/coloricon.png', tabId: tabInfo.tabId})
+            }
+        }).catch(err => {
+            console.log(`Error: ${
+                err.message
+            }`)
+        })
     }
 })
