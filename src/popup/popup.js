@@ -9,21 +9,29 @@ function startPopup() {
             Alternative: ${
                 msg.data.name
             }<br>
-            <img src="https:${
+                <a href="">
+                    <img src="https:${
                 msg.data.img
-            }"><br>
-            <button class="product-link">Open Product Page</button>
+            }">
+                </a>
+            <br>
         </div>
         `
-            const link = document.querySelector('.product-link')
+            const image = document.querySelector('img')
 
-            link.addEventListener('click', function (e) {
+            image.addEventListener('click', function (e) {
                 chrome.tabs.create({
                         url: `${
                         msg.data.link
                     }`
                 });
             })
+        } else if (msg.command === 'AMAZON - PRODUCT IS ALTERNATIVE') {
+            document.body.innerHTML = `
+            <div>
+                Great find! No alternative needed.
+            </div>
+        `
         } else if (msg.command === 'AMAZON - PRODUCT NOT FOUND') {
             document.body.innerHTML = `
                 <div>
@@ -41,7 +49,7 @@ function startPopup() {
             <div>
                 Go to Amazon to start shopping!
             <br>
-                <button class="amazon-link">Open Amazon</button>
+                <button class="amazon-link" >Open Amazon</button>
             </div>
             `
             const link = document.querySelector('.amazon-link')
