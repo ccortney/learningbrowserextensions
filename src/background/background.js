@@ -1,13 +1,6 @@
+import res from "express/lib/response.js";
 import {initializeApp} from "../firebase/firebase-app.js"
-import {
-    getFirestore,
-    collection,
-    query,
-    where,
-    getDocs,
-    addDoc,
-    doc
-} from "../firebase/firebase-firestore.js"
+import {getFirestore, collection, query, getDocs} from "../firebase/firebase-firestore.js"
 
 const firebaseConfig = {
     apiKey: 'AIzaSyCUOWLQzjGuHfsd0Ih6MmEiOwcdoLYWyUM',
@@ -29,7 +22,7 @@ async function getTab(query) {
     let urlResults = checkUrl(result[0].url)
     return {
         tabName: result[0].title,
-        tabId: result[0].tabId,
+        tabId: result[0].id,
         domain: domain,
         url: result[0].url,
         ... urlResults
@@ -61,11 +54,17 @@ async function searchData(snapshot, tabInfo) {
     for (let doc of snapshot.docs) {
         if (tabInfo.productPage) {
             if (tab.includes(doc.data().name.toLowerCase())) {
-                return doc.data()
+                return {
+                    id: doc.id,
+                    ... doc.data()
+                }
             }
         } else {
             if (doc.data().name.toLowerCase().includes(tab)) {
-                return doc.data()
+                return {
+                    id: doc.id,
+                    ... doc.data()
+                }
             }
         }
     }
@@ -74,12 +73,14 @@ async function searchData(snapshot, tabInfo) {
 function sendData(doc, tabInfo) {
     if (! doc) {
         chrome.runtime.sendMessage({domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT NOT FOUND'});
+    } else if (doc.link === tabInfo.url) {
+        chrome.runtime.sendMessage({data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT IS ALTERNATIVE'});
     } else {
         chrome.runtime.sendMessage({data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT FOUND'});
     }
 }
 
-chrome.runtime.onMessage.addListener(async (msg) => {
+chrome.runtime.onMessage.addListener(async () => {
     let tabInfo = await getTab({active: true, lastFocusedWindow: true})
     if (tabInfo.domain === "amazon.com" && (tabInfo.productPage || tabInfo.searchPage)) {
         getDatabaseElements('products').then((snapshot) => {
@@ -106,8 +107,10 @@ chrome.tabs.onUpdated.addListener(async () => {
         getDatabaseElements('products').then((snapshot) => {
             return searchData(snapshot, tabInfo)
         }).then((doc) => {
-            if (doc) {
-                chrome.action.setIcon({path: 'assets/coloricon.png', tabId: tabInfo.tabId})
+            if (doc && doc.link == tabInfo.url) {
+                chrome.action.setIcon({path: 'assets/yellowicon.png', tabId: tabInfo.tabId})
+            } else if (doc) {
+                chrome.action.setIcon({path: 'assets/blueicon.png', tabId: tabInfo.tabId})
             }
         }).catch(err => {
             console.log(`Error: ${
