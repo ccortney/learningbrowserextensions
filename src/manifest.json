@@ -21,12 +21,11 @@
 			"16": "assets/greyicon.png"
 		  }
 	},
-	// "options_page": "options/options.html",
 	"web_accessible_resources": [
 		{
 			"resources": [ "firebase-app.bundle.js", "firebase-firestore.bundle.js" ],
 			"matches": [ "<all_urls>" ]
 		}
 	],
-	"permissions": [ "tabs", "activeTab", "storage", "webNavigation" ]
+	"permissions": [ "tabs", "activeTab" ]
 }
