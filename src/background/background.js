@@ -1,4 +1,3 @@
-import res from "express/lib/response.js";
 import {initializeApp} from "../firebase/firebase-app.js"
 import {getFirestore, collection, query, getDocs} from "../firebase/firebase-firestore.js"
 
@@ -46,6 +45,16 @@ function checkUrl(url) {
 async function getDatabaseElements(db_name) {
     const q = query(collection(db, db_name));
     const querySnapshot = await getDocs(q);
+
+    let products = []
+    for (let doc of querySnapshot.docs) {
+        products.push({
+            id: doc.id,
+            name: doc.data().name,
+            ... doc.data()
+        })
+    }
+    console.log(products)
     return querySnapshot
 }
 
@@ -73,7 +82,7 @@ async function searchData(snapshot, tabInfo) {
 function sendData(doc, tabInfo) {
     if (! doc) {
         chrome.runtime.sendMessage({domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT NOT FOUND'});
-    } else if (doc.link === tabInfo.url) {
+    } else if (doc && doc.link === tabInfo.url) {
         chrome.runtime.sendMessage({data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT IS ALTERNATIVE'});
     } else {
         chrome.runtime.sendMessage({data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT FOUND'});
