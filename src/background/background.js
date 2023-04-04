@@ -1,5 +1,12 @@
 import {initializeApp} from "../firebase/firebase-app.js"
-import {getFirestore, collection, query, getDocs} from "../firebase/firebase-firestore.js"
+import {
+    getFirestore,
+    collection,
+    query,
+    getDocs,
+    doc,
+    getDoc
+} from "../firebase/firebase-firestore.js"
 
 const firebaseConfig = {
     apiKey: 'AIzaSyCUOWLQzjGuHfsd0Ih6MmEiOwcdoLYWyUM',
@@ -45,86 +52,83 @@ function checkUrl(url) {
 async function getDatabaseElements(db_name) {
     const q = query(collection(db, db_name));
     const querySnapshot = await getDocs(q);
-
-    let products = []
-    for (let doc of querySnapshot.docs) {
-        products.push({
-            id: doc.id,
-            name: doc.data().name,
-            ... doc.data()
-        })
-    }
-    console.log(products)
     return querySnapshot
 }
 
 async function searchData(snapshot, tabInfo) {
     const tab = tabInfo.tabName.replace('Amazon.com : ', '').toLowerCase();
+
     for (let doc of snapshot.docs) {
         if (tabInfo.productPage) {
-            if (tab.includes(doc.data().name.toLowerCase())) {
-                return {
-                    id: doc.id,
-                    ... doc.data()
-                }
+            if (tab.includes(doc.data().phrase.toLowerCase())) {
+                let product = await getProduct(doc.data().productId)
+                return product
             }
         } else {
-            if (doc.data().name.toLowerCase().includes(tab)) {
-                return {
-                    id: doc.id,
-                    ... doc.data()
-                }
+            if (doc.data().phrase.toLowerCase().includes(tab)) {
+                let product = await getProduct(doc.data().productId)
+                return product
             }
         }
     }
 }
 
-function sendData(doc, tabInfo) {
-    if (! doc) {
-        chrome.runtime.sendMessage({domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT NOT FOUND'});
-    } else if (doc && doc.link === tabInfo.url) {
-        chrome.runtime.sendMessage({data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT IS ALTERNATIVE'});
-    } else {
-        chrome.runtime.sendMessage({data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT FOUND'});
+async function getProduct(id) {
+    const docRef = doc(db, 'products', id)
+    const docSnap = await getDoc(docRef)
+    return {
+        id: id,
+        ... docSnap.data()
     }
 }
 
-chrome.runtime.onMessage.addListener(async () => {
+
+function sendMessage(message) {
+    chrome.runtime.sendMessage(message)
+}
+
+function determineMessage(doc, tabInfo) {
+    if (! doc) {
+        return {domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT NOT FOUND'}
+    } else if (doc && doc.link === tabInfo.url) {
+        chrome.action.setIcon({path: 'assets/yellowicon.png', tabId: tabInfo.tabId})
+        return {data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT IS ALTERNATIVE'}
+    } else {
+        chrome.action.setIcon({path: 'assets/greenicon.png', tabId: tabInfo.tabId})
+        return {data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT FOUND'}
+    }
+}
+
+async function startSearch() {
     let tabInfo = await getTab({active: true, lastFocusedWindow: true})
     if (tabInfo.domain === "amazon.com" && (tabInfo.productPage || tabInfo.searchPage)) {
-        getDatabaseElements('products').then((snapshot) => {
+        return getDatabaseElements('search-phrases').then((snapshot) => {
             return searchData(snapshot, tabInfo)
-
         }).then((doc) => {
-            sendData(doc, tabInfo)
+            return determineMessage(doc, tabInfo)
         }).catch(err => {
-            chrome.runtime.sendMessage({command: 'ERROR'})
             console.log(`Error: ${
                 err.message
             }`)
+            return {command: 'ERROR'}
         })
     } else if (tabInfo.domain === 'amazon.com') {
-        chrome.runtime.sendMessage({command: 'AMAZON - NOT PRODUCT PAGE'})
+        return {command: 'AMAZON - NOT PRODUCT PAGE'}
     } else {
-        chrome.runtime.sendMessage({command: 'NOT AMAZON SITE'})
+        return {command: 'NOT AMAZON SITE'}
     }
-})
+}
 
 chrome.tabs.onUpdated.addListener(async () => {
-    let tabInfo = await getTab({active: true, lastFocusedWindow: true})
-    if (tabInfo.domain === "amazon.com" && (tabInfo.productPage || tabInfo.searchPage)) {
-        getDatabaseElements('products').then((snapshot) => {
-            return searchData(snapshot, tabInfo)
-        }).then((doc) => {
-            if (doc && doc.link == tabInfo.url) {
-                chrome.action.setIcon({path: 'assets/yellowicon.png', tabId: tabInfo.tabId})
-            } else if (doc) {
-                chrome.action.setIcon({path: 'assets/blueicon.png', tabId: tabInfo.tabId})
-            }
-        }).catch(err => {
-            console.log(`Error: ${
-                err.message
-            }`)
-        })
-    }
+    let message = await startSearch()
+
+    chrome.runtime.onMessage.addListener(async () => {
+        sendMessage(message)
+    })
+
 })
+
+
+// felt tip marker pens (box of 10 black) ID: 2fZVDcHF4L8IUSbFB5Kd
+// felt tip marker pens (box of 4) ID: fK7vDfPAFkAZXb0BEnAu
+// felt tip marker pens (box of 2 black/blue) ID: fwmYskJOEZUC61bBS0pS
