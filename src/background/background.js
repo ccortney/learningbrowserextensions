@@ -22,13 +22,16 @@ const firebaseConfig = {
 const firebase_app = initializeApp(firebaseConfig);
 const db = getFirestore(firebase_app)
 
-chrome.tabs.onUpdated.addListener(async () => {
+chrome.tabs.onHighlighted.addListener(async () => {
     let message = await startSearch()
+
+    chrome.tabs.onUpdated.addListener(async () => {
+        message = await startSearch()
+    })
 
     chrome.runtime.onMessage.addListener(async () => {
         chrome.runtime.sendMessage(message)
     })
-
 })
 
 async function startSearch() {
@@ -122,7 +125,3 @@ function determineMessage(doc, tabInfo) {
         return {data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT FOUND'}
     }
 }
-
-// felt tip marker pens (box of 10 black) ID: 2fZVDcHF4L8IUSbFB5Kd
-// felt tip marker pens (box of 4) ID: fK7vDfPAFkAZXb0BEnAu
-// felt tip marker pens (box of 2 black/blue) ID: fwmYskJOEZUC61bBS0pS
