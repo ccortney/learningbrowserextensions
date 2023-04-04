@@ -22,6 +22,35 @@ const firebaseConfig = {
 const firebase_app = initializeApp(firebaseConfig);
 const db = getFirestore(firebase_app)
 
+chrome.tabs.onUpdated.addListener(async () => {
+    let message = await startSearch()
+
+    chrome.runtime.onMessage.addListener(async () => {
+        chrome.runtime.sendMessage(message)
+    })
+
+})
+
+async function startSearch() {
+    let tabInfo = await getTab({active: true, lastFocusedWindow: true})
+    if (tabInfo.domain === "amazon.com" && (tabInfo.productPage || tabInfo.searchPage)) {
+        return getDatabaseElements('search-phrases').then((snapshot) => {
+            return searchData(snapshot, tabInfo)
+        }).then((doc) => {
+            return determineMessage(doc, tabInfo)
+        }).catch(err => {
+            console.log(`Error: ${
+                err.message
+            }`)
+            return {command: 'ERROR'}
+        })
+    } else if (tabInfo.domain === 'amazon.com') {
+        return {command: 'AMAZON - NOT PRODUCT PAGE'}
+    } else {
+        return {command: 'NOT AMAZON SITE'}
+    }
+}
+
 async function getTab(query) {
     let result = await chrome.tabs.query(query)
     let domain = getDomain(result[0].url)
@@ -82,11 +111,6 @@ async function getProduct(id) {
     }
 }
 
-
-function sendMessage(message) {
-    chrome.runtime.sendMessage(message)
-}
-
 function determineMessage(doc, tabInfo) {
     if (! doc) {
         return {domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT NOT FOUND'}
@@ -98,36 +122,6 @@ function determineMessage(doc, tabInfo) {
         return {data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT FOUND'}
     }
 }
-
-async function startSearch() {
-    let tabInfo = await getTab({active: true, lastFocusedWindow: true})
-    if (tabInfo.domain === "amazon.com" && (tabInfo.productPage || tabInfo.searchPage)) {
-        return getDatabaseElements('search-phrases').then((snapshot) => {
-            return searchData(snapshot, tabInfo)
-        }).then((doc) => {
-            return determineMessage(doc, tabInfo)
-        }).catch(err => {
-            console.log(`Error: ${
-                err.message
-            }`)
-            return {command: 'ERROR'}
-        })
-    } else if (tabInfo.domain === 'amazon.com') {
-        return {command: 'AMAZON - NOT PRODUCT PAGE'}
-    } else {
-        return {command: 'NOT AMAZON SITE'}
-    }
-}
-
-chrome.tabs.onUpdated.addListener(async () => {
-    let message = await startSearch()
-
-    chrome.runtime.onMessage.addListener(async () => {
-        sendMessage(message)
-    })
-
-})
-
 
 // felt tip marker pens (box of 10 black) ID: 2fZVDcHF4L8IUSbFB5Kd
 // felt tip marker pens (box of 4) ID: fK7vDfPAFkAZXb0BEnAu
