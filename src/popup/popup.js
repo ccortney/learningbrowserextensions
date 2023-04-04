@@ -23,13 +23,13 @@ chrome.runtime.onMessage.addListener((msg) => {
         document.body.innerHTML = createPopUpHTML(alert, text, false)
 
     } else if (msg.command === 'AMAZON - PRODUCT NOT FOUND') {
-        let alert = "No Alternive Found!"
+        let alert = "No Alternative Found!"
         let text = "We are adding more products every day, <br> check again soon."
         
         document.body.innerHTML = createPopUpHTML(alert, text, false)
 
     } else if (msg.command === 'AMAZON - NOT PRODUCT PAGE') {
-        let alert = "No Alternive Found!"
+        let alert = "No Alternative Found!"
         let text = "Open a product to start finding sustainable, <br> environmentally-friendly alternatives!"
 
         document.body.innerHTML = createPopUpHTML(alert, text, false)
@@ -105,6 +105,7 @@ function createPopUpHTML(alert, text, button) {
 
 function createPopUpHTMLwithProduct(alert, text, msg) {
     let html = createPopUpHTML(alert, text, false)
+
     let productHTML = `
         <div class="product">
             <a href="">
