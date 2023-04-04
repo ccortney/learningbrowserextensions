@@ -1,5 +1,51 @@
 body {
-	width: 300px;
+	width: 275px;
 	height: 100px;
-	margin: 0;
+}
+  
+.header h3 {
+	display: flex;
+	align-items: center;
+	vertical-align: middle;
+}
+
+.header .icon {
+	height: 30px;
+	width: 30px;
+	margin: 0 5px 0 5px ;
+} 
+
+.message {
+	text-align: center;
+	font-size: 0.75rem;
+}
+
+.message .alert {
+	font-weight: bold;
+	font-size: 1rem;
+	line-height: 0.5rem;
+}
+
+.button {
+	text-align: center;
+}
+
+.amazon-link {
+	background-color: #FF9900;
+	border-radius: 4px;
+	padding: 4px;
+	margin-bottom: 10px;
+}
+
+.amazon-link:hover {
+	cursor: pointer
+}
+
+.product {
+	text-align: center;
+}
+
+.productImage{
+	width: 150px;
+	margin-bottom: 10px;
 }
