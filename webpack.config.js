@@ -19,11 +19,6 @@ const options = {
         path: path.resolve(__dirname, 'dist'),
         clean: true
     },
-    performance: {
-        hints: false,
-        maxEntrypointSize: 512000,
-        maxAssetSize: 512000
-    },
     module: {
         rules: [
             {
@@ -45,22 +40,7 @@ const options = {
         ]
     },
     resolve: {
-        extensions: [
-            '.js', '.css'
-        ],
-        fallback: {
-            "path": false,
-            "buffer": false,
-            "util": false,
-            "stream": false,
-            "querystring": false,
-            "http": false,
-            "crypto": false,
-            "zlib": false,
-            "events": false,
-            "async_hooks": false,
-            "fs": false
-        }
+        extensions: ['.js', '.css']
     },
     plugins: [
         new CopyWebpackPlugin(
