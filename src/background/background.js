@@ -78,9 +78,20 @@ function checkUrl(url) {
     const searchStr = "s?k="
     const productResult = productStrs.some(str => url.includes(str))
     const searchResult = url.includes(searchStr)
-    return {productPage: productResult, searchPage: searchResult}
+    const ASIN = getASIN(url)
+    return {productPage: productResult, searchPage: searchResult, ASIN: ASIN}
 }
 
+function getASIN(url) {
+    if (url.indexOf('/dp') > -1 ) {
+        let idx = +url.indexOf('/dp') + 4
+        return url.substring(idx, idx + 10)
+    } else if (url.indexOf('/gp/product') > -1 ) {
+        let idx = +url.indexOf('/gp/product') + 12
+        return url.substring(idx, idx + 10)
+    } else return null
+}
+ 
 async function getDatabaseElements(db_name) {
     const q = query(collection(db, db_name));
     const querySnapshot = await getDocs(q);
@@ -92,12 +103,12 @@ async function searchData(snapshot, tabInfo) {
 
     for (let doc of snapshot.docs) {
         if (tabInfo.productPage) {
-            if (tab.includes(doc.data().phrase.toLowerCase())) {
+            if (tab.split(" ").includes(doc.data().phrase.toLowerCase())) {
                 let product = await getProduct(doc.data().productId)
                 return product
             }
         } else {
-            if (doc.data().phrase.toLowerCase().includes(tab)) {
+            if (doc.data().phrase.toLowerCase().split(" ").includes(tab)) {
                 let product = await getProduct(doc.data().productId)
                 return product
             }
@@ -117,7 +128,7 @@ async function getProduct(id) {
 function determineMessage(doc, tabInfo) {
     if (! doc) {
         return {domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT NOT FOUND'}
-    } else if (doc && doc.link === tabInfo.url) {
+    } else if (doc && doc.ASIN === tabInfo.ASIN) {
         chrome.action.setIcon({path: 'assets/yellowicon.png', tabId: tabInfo.tabId})
         return {data: doc, domain: tabInfo.domain, tabName: tabInfo.tabName, command: 'AMAZON - PRODUCT IS ALTERNATIVE'}
     } else {
